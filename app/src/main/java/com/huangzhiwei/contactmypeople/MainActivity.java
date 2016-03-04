@@ -1,16 +1,20 @@
 package com.huangzhiwei.contactmypeople;
 
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AlphabetIndexer;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -23,6 +27,20 @@ public class MainActivity extends AppCompatActivity {
      */
     private LinearLayout titleLayout;
 
+    /**
+     * 弹出式分组的布局
+     */
+    private RelativeLayout sectionToastLayout;
+
+    /**
+     * 右侧可滑动字母表
+     */
+    private Button alphabetButton;
+
+    /**
+     * 弹出式分组上的文字
+     */
+    private TextView sectionToastText;
     /**
      * 分组上显示的字母
      */
@@ -64,12 +82,14 @@ public class MainActivity extends AppCompatActivity {
 
         adapter = new ContactAdapter(this,R.layout.contact_item,contacts);
         titleLayout = (LinearLayout) findViewById(R.id.title_layout);
+        sectionToastLayout = (RelativeLayout) findViewById(R.id.section_toast_layout);
+        sectionToastText = (TextView) findViewById(R.id.section_toast_text);
+        alphabetButton = (Button) findViewById(R.id.alphabetButton);
         title = (TextView) findViewById(R.id.title);
         contactsListView = (ListView) findViewById(R.id.contacts_list_view);
 
         Uri uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
         Cursor cursor = getContentResolver().query(uri,new String[] { "display_name", "phonebook_label" },null,null,"phonebook_label");
-//        Cursor cursor = getContentResolver().query(uri,null,null,null,null);
         if(cursor.moveToFirst())
         {
             do {
@@ -86,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
         adapter.setIndexer(indexer);
         if (contacts.size() > 0) {
             setupContactsListView();
+            setAlpabetListener();
         }
     }
 
@@ -130,6 +151,47 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 lastFirstVisibleItem = firstVisibleItem;
+            }
+        });
+    }
+
+    /**
+     * 设置字母表上的触摸事件，根据当前触摸的位置结合字母表的高度，计算出当前触摸在哪个字母上。
+     * 当手指按在字母表上时，展示弹出式分组。手指离开字母表时，将弹出式分组隐藏。
+     */
+    private void setAlpabetListener()
+    {
+        alphabetButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                float alphabetHeight = alphabetButton.getHeight();
+                float y = event.getY();
+                int sectionPosition = (int) (y/alphabetHeight * 27);
+                if(sectionPosition<0)
+                    sectionPosition = 0;
+                else if(sectionPosition>26)
+                    sectionPosition = 26;
+                String sectionLetter = String.valueOf(alphabet.charAt(sectionPosition));
+                int position = indexer.getPositionForSection(sectionPosition);
+                switch (event.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN:
+                        alphabetButton.setBackgroundColor(Color.BLACK);
+                        sectionToastLayout.setVisibility(View.VISIBLE);
+                        sectionToastText.setText(sectionLetter);
+                        contactsListView.setSelection(position);
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        sectionToastText.setText(sectionLetter);
+                        contactsListView.setSelection(position);
+                        break;
+                    default:
+                        alphabetButton.setBackgroundColor(Color.WHITE);
+                        sectionToastLayout.setVisibility(View.GONE);
+                        break;
+
+                }
+                return true;
             }
         });
     }

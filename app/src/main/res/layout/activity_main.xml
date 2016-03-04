@@ -29,4 +29,31 @@
             android:textSize="13sp" />
     </LinearLayout>
 
+    <Button
+        android:id="@+id/alphabetButton"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_alignParentRight="true"
+        android:background="@android:color/darker_gray"
+        android:textColor="#ffffff"
+        />
+
+    <RelativeLayout
+        android:id="@+id/section_toast_layout"
+        android:layout_width="70dip"
+        android:layout_height="70dip"
+        android:layout_centerInParent="true"
+        android:background="@android:color/black"
+        android:visibility="gone"
+        >
+        <TextView
+            android:id="@+id/section_toast_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:textColor="#fff"
+            android:textSize="30sp"
+            />
+    </RelativeLayout>
+
 </RelativeLayout>  
